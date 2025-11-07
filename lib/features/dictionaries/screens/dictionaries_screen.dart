@@ -16,18 +16,18 @@ class DictionariesScreen extends StatefulWidget {
 
 class _DictionariesScreenState extends State<DictionariesScreen> {
   final _controller = TextEditingController();
+
   late final service = getIt<TopicsService>();
 
   @override
   Widget build(BuildContext context) {
-    final inherited = TopicsInherited.of(context);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Словари')),
       body: ListView.builder(
-        itemCount: inherited.topics.length,
+        itemCount: service.topics.length,
         itemBuilder: (_, i) {
-          final topic = inherited.topics[i];
+          final topic = service.topics[i];
           return TopicCard(
             topic: topic,
             selected: topic.selected,

@@ -20,8 +20,7 @@ void main() {
         () => TopicsService(topics, () => updateCallback?.call()),
   );
 
-  runApp(MyApp(
-    topics: topics,
+  runApp(MyApp(topics: topics,
     setUpdateCallback: (cb) => updateCallback = cb,
   ));
 }

@@ -22,6 +22,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
   @override
   Widget build(BuildContext context) {
     final topics = TopicsInherited.of(context).topics;
+
     final total = topics.expand((t) => t.words).length;
     final learned = topics.expand((t) => t.words.where((w) => w.learned)).length;
     final progress = total > 0 ? (learned / total) * 100 : 0;
