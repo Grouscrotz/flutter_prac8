@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:prac8/data/topics_data.dart';
 import 'package:prac8/features/learning/widgets/button.dart';
-import '../../../models/topic.dart';
 
 class LearningScreen extends StatefulWidget {
   const LearningScreen({super.key});
@@ -17,82 +16,65 @@ class _LearningScreenState extends State<LearningScreen> {
   void _onItemTapped(int index) {
     if (index == _selectedIndex) return;
     setState(() => _selectedIndex = index);
-
-    if (index == 0) {
-      context.go('/dictionaries');
-    } else if (index == 2) {
-      context.go('/progress');
-    }
+    if (index == 0) context.go('/dictionaries');
+    if (index == 2) context.go('/progress');
   }
 
   @override
   Widget build(BuildContext context) {
+    final topics = TopicsInherited.of(context).topics;
+    if (topics.isEmpty) {
+      return const Scaffold(body: Center(child: Text('Нет словарей')));
+    }
+
+    final topic = topics.firstWhere((t) => t.selected, orElse: () => topics.first);
+    final newCount = topic.words.where((w) => !w.learned).length;
+    final repeatCount = topic.words.where((w) => w.learned).length;
+
     return Scaffold(
       appBar: AppBar(title: const Text('Изучение')),
-      body: ValueListenableBuilder<List<Topic>>(
-        valueListenable: TopicsData.topicsNotifier,
-        builder: (context, topics, child) {
-          if (topics.isEmpty) {
-            return const Center(child: Text('Нет словарей'));
-          }
-          final topic = topics.firstWhere((t) => t.selected,
-              orElse: () => topics.first);
-          final newCount = topic.words.where((w) => !w.learned).length;
-          final repeatCount = topic.words.where((w) => w.learned).length;
-
-          return Container(
-            color: const Color(0xFFcfd9df),
-            padding: const EdgeInsets.all(16),
-            child: Center(
-              child: Card(
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16)),
-                elevation: 6,
-                child: Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text('Словарь: ${topic.name}',
-                          style: const TextStyle(
-                              fontSize: 24, fontWeight: FontWeight.bold)),
-                      const SizedBox(height: 30),
-                      MyButton(
-                        icon: Icons.settings,
-                        iconColor: Colors.blue,
-                        label: 'Настройки словаря',
-                        counter: 1,
-                        onPressed: () => context.push('/topic_settings'),
-                      ),
-                      const SizedBox(height: 16),
-                      MyButton(
-                        icon: Icons.play_arrow,
-                        iconColor: Colors.green,
-                        label: 'Учить новые слова',
-                        counter: newCount,
-                        onPressed: () => context.push(
-                          '/flashcard',
-                          extra: {'topic': topic, 'learningNew': true},
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      MyButton(
-                        icon: Icons.refresh,
-                        iconColor: Colors.orangeAccent,
-                        label: 'Повторить слова',
-                        counter: repeatCount,
-                        onPressed: () => context.push(
-                          '/flashcard',
-                          extra: {'topic': topic, 'learningNew': false},
-                        ),
-                      ),
-                    ],
+      body: Container(
+        color: const Color(0xFFcfd9df),
+        padding: const EdgeInsets.all(16),
+        child: Center(
+          child: Card(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            elevation: 6,
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text('Словарь: ${topic.name}', style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 30),
+                  MyButton(
+                    icon: Icons.settings,
+                    iconColor: Colors.blue,
+                    label: 'Настройки словаря',
+                    counter: 1,
+                    onPressed: () => context.push('/topic_settings'),
                   ),
-                ),
+                  const SizedBox(height: 16),
+                  MyButton(
+                    icon: Icons.play_arrow,
+                    iconColor: Colors.green,
+                    label: 'Учить новые слова',
+                    counter: newCount,
+                    onPressed: () => context.push('/flashcard', extra: {'topic': topic, 'learningNew': true}),
+                  ),
+                  const SizedBox(height: 16),
+                  MyButton(
+                    icon: Icons.refresh,
+                    iconColor: Colors.orangeAccent,
+                    label: 'Повторить слова',
+                    counter: repeatCount,
+                    onPressed: () => context.push('/flashcard', extra: {'topic': topic, 'learningNew': false}),
+                  ),
+                ],
               ),
             ),
-          );
-        },
+          ),
+        ),
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
@@ -100,8 +82,7 @@ class _LearningScreenState extends State<LearningScreen> {
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.book), label: 'Словари'),
           BottomNavigationBarItem(icon: Icon(Icons.school), label: 'Изучение'),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.analytics), label: 'Прогресс'),
+          BottomNavigationBarItem(icon: Icon(Icons.analytics), label: 'Прогресс'),
         ],
       ),
     );
